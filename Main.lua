@@ -116,7 +116,16 @@ local IsInArena --wheter or not the player is in a arena map
 --BattleGroundEnemies.AllyFaction
 
 
+BattleGroundEnemies.Modules = {} 
 
+function BattleGroundEnemies:RegisterModule(name, defaultSettings, options)
+	if self.Modules[name] then return error("module "..name.."is already registered") end
+	self.Modules[name] = {
+		defaultSettings = defaultSettings or {},
+		options = options or {}
+	}
+	return CreateFrame("frame")
+end
 
 
 
@@ -2369,7 +2378,10 @@ do
 			GUID = UnitGUID("player")
 		}
 		
-		
+		for moduleName, moduleData in pairs(self.Modules) do
+			Mixin(Data.defaultSettings.profile, {moduleName = {moduleData.defaultSettings}})
+		end
+
 		self.db = LibStub("AceDB-3.0"):New("BattleGroundEnemiesDB", Data.defaultSettings, true)
 
 		self.db.RegisterCallback(self, "OnProfileChanged", "ProfileChanged")
@@ -2912,43 +2924,10 @@ function BattleGroundEnemies:UNIT_HEALTH(unitID) --gets health of nameplates, pl
 end
 
 BattleGroundEnemies.UNIT_HEALTH_FREQUENT = BattleGroundEnemies.UNIT_HEALTH --TBC compability, isTBCC
-
-function BattleGroundEnemies:UNIT_MAXHEALTH(unitID) --gets health of nameplates, player, target, focus, raid1 to raid40, partymember
-	local playerButton = self:GetPlayerbuttonByUnitID(unitID)
-	if playerButton and playerButton.isShown then --unit is a shown enemy
-		playerButton:UpdateHealth(unitID)
-		playerButton.displayedUnit = unitID
-		playerButton.optionTable = {displayHealPrediction = playerButton.bgSizeConfig.HealthBar_HealthPrediction_Enabled}
-		if not isTBCC then CompactUnitFrame_UpdateHealPrediction(playerButton) end
-	end
-end
-
-function BattleGroundEnemies:UNIT_HEAL_PREDICTION(unitID) --gets health of nameplates, player, target, focus, raid1 to raid40, partymember
-	local playerButton = self:GetPlayerbuttonByUnitID(unitID)
-	if playerButton and playerButton.isShown then --unit is a shown enemy
-		playerButton.displayedUnit = unitID
-		playerButton.optionTable = {displayHealPrediction = playerButton.bgSizeConfig.HealthBar_HealthPrediction_Enabled}
-		if not isTBCC then CompactUnitFrame_UpdateHealPrediction(playerButton) end
-	end
-end
-
-function BattleGroundEnemies:UNIT_ABSORB_AMOUNT_CHANGED(unitID) --gets health of nameplates, player, target, focus, raid1 to raid40, partymember
-	local playerButton = self:GetPlayerbuttonByUnitID(unitID)
-	if playerButton and playerButton.isShown then --unit is a shown enemy
-		playerButton.displayedUnit = unitID
-		playerButton.optionTable = {displayHealPrediction = playerButton.bgSizeConfig.HealthBar_HealthPrediction_Enabled}
-		if not isTBCC then CompactUnitFrame_UpdateHealPrediction(playerButton) end
-	end
-end
-
-function BattleGroundEnemies:UNIT_HEAL_ABSORB_AMOUNT_CHANGED(unitID) --gets health of nameplates, player, target, focus, raid1 to raid40, partymember
-	local playerButton = self:GetPlayerbuttonByUnitID(unitID)
-	if playerButton and playerButton.isShown then --unit is a shown enemy
-		playerButton.displayedUnit = unitID
-		playerButton.optionTable = {displayHealPrediction = playerButton.bgSizeConfig.HealthBar_HealthPrediction_Enabled} 
-		if not isTBCC then CompactUnitFrame_UpdateHealPrediction(playerButton) end
-	end
-end
+BattleGroundEnemies.UNIT_MAXHEALTH = BattleGroundEnemies.UNIT_HEALTH --TBC compability, isTBCC
+BattleGroundEnemies.UNIT_HEAL_PREDICTION = BattleGroundEnemies.UNIT_HEALTH --TBC compability, isTBCC
+BattleGroundEnemies.UNIT_ABSORB_AMOUNT_CHANGED = BattleGroundEnemies.UNIT_HEALTH --TBC compability, isTBCC
+BattleGroundEnemies.UNIT_HEAL_ABSORB_AMOUNT_CHANGED = BattleGroundEnemies.UNIT_HEALTH --TBC compability, isTBCC
 
 
 function BattleGroundEnemies:UNIT_POWER_FREQUENT(unitID, powerToken) --gets power of nameplates, player, target, focus, raid1 to raid40, partymember

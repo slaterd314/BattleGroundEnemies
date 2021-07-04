@@ -34,11 +34,11 @@ TargetCall.lua
 Changelog.lua
 
 
-Objects\Auracontainer.lua
-Objects\DR.lua
-Objects\ObjectiveAndRespawn.lua
-Objects\Racial.lua
-Objects\Trinket.lua
+Modules\Auracontainer.lua
+Modules\DR.lua
+Modules\ObjectiveAndRespawn.lua
+Modules\Racial.lua
+Modules\Trinket.lua
 
 Testmode.lua
 Options.lua
