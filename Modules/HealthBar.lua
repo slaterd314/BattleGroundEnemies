@@ -8,47 +8,62 @@ local CompactUnitFrame_UpdateHealPrediction = CompactUnitFrame_UpdateHealPredict
 
 local L = Data.L
 
+local function addVerticalSpacing(order)
+	local verticalSpacing = {
+		type = "description",
+		name = " ",
+		fontSize = "large",
+		width = "full",
+		order = order
+	}
+	return verticalSpacing
+end
+
+local function addHorizontalSpacing(order)
+	local horizontalSpacing = {
+		type = "description",
+		name = " ",
+		width = "half",	
+		order = order,
+	}
+	return horizontalSpacing
+end
+
 local defaults =  {
 	HealthBar_Texture = 'UI-StatusBar',
 	HealthBar_Background = {0, 0, 0, 0.66}
 }
 
 local options = {
-	General = {
-		type = "group",
-		name = L.General,
-		desc = "",
-		--inline = true,
-		order = 7,
-		args = {
-			HealthBar_Texture = {
-				type = "select",
-				name = L.BarTexture,
-				desc = L.HealthBar_Texture_Desc,
-				dialogControl = 'LSM30_Statusbar',
-				values = AceGUIWidgetLSMlists.statusbar,
-				width = "normal",
-				order = 1
-			},
-			Fake = addHorizontalSpacing(2),
-			HealthBar_Background = {
-				type = "color",
-				name = L.BarBackground,
-				desc = L.HealthBar_Background_Desc,
-				hasAlpha = true,
-				width = "normal",
-				order = 3
-			},
-			Fake = addVerticalSpacing(4),
-			HealthBar_HealthPrediction_Enabled = {
-				type = "toggle",
-				name = COMPACT_UNIT_FRAME_PROFILE_DISPLAYHEALPREDICTION,
-				width = "normal",
-				order = 5,
-			}
-		}
+	HealthBar_Texture = {
+		type = "select",
+		name = L.BarTexture,
+		desc = L.HealthBar_Texture_Desc,
+		dialogControl = 'LSM30_Statusbar',
+		values = AceGUIWidgetLSMlists.statusbar,
+		width = "normal",
+		order = 1
+	},
+	Fake = addHorizontalSpacing(2),
+	HealthBar_Background = {
+		type = "color",
+		name = L.BarBackground,
+		desc = L.HealthBar_Background_Desc,
+		hasAlpha = true,
+		width = "normal",
+		order = 3
+	},
+	Fake = addVerticalSpacing(4),
+	HealthBar_HealthPrediction_Enabled = {
+		type = "toggle",
+		name = COMPACT_UNIT_FRAME_PROFILE_DISPLAYHEALPREDICTION,
+		width = "normal",
+		order = 5,
 	}
 }
+	
+	
+
 
 local healthBar = BattleGroundEnemies:RegisterModule("healthBar", defaults, options)
 healthBar:SetScript("OnEvent", function(self, event, ...)
@@ -57,7 +72,7 @@ healthBar:SetScript("OnEvent", function(self, event, ...)
 end)
 
 
-function healthbar.AttachToButton(playerButton)
+healthBar.AttachToButton = function(self, playerButton)
 	playerButton.healthBar = CreateFrame('StatusBar', nil, playerButton)
 	playerButton.healthBar:SetPoint('BOTTOMLEFT', playerButton, "BOTTOMLEFT")
 	playerButton.healthBar:SetPoint('TOPRIGHT', playerButton, "TOPRIGHT")
@@ -116,7 +131,7 @@ function healthbar.AttachToButton(playerButton)
 	playerButton.healthBar.Background:SetTexture("Interface/Buttons/WHITE8X8")
 end
 
-healthBar.RegisterEvents = function()
+healthBar.Enable = function(self, playerButton)
 	local GeneralEvents = {"UNIT_HEALTH", "UNIT_MAXHEALTH"}
 	local TBCCEvents = {"UNIT_HEALTH_FREQUENT"}
 	local RetailEvents = {"UNIT_HEAL_PREDICTION", "UNIT_ABSORB_AMOUNT_CHANGED", "UNIT_HEAL_ABSORB_AMOUNT_CHANGED"}
@@ -129,15 +144,13 @@ healthBar.RegisterEvents = function()
 	for i = 1, #GeneralEvents do
 		healthBar:RegisterEvent(GeneralEvents(i))
 	end
+	playerButton.healthBar:Show()
 end
 
 healthBar.UNIT_HEALTH = function(self, unitID)
 	local playerButton = BattleGroundEnemies:GetPlayerbuttonByUnitID(unitID)
 	if playerButton and playerButton.isShown then --unit is a shown player
 		self:Update(playerButton, unitID)
-		playerButton.displayedUnit = unitID
-		playerButton.optionTable = {displayHealPrediction = playerButton.bgSizeConfig.HealthBar_HealthPrediction_Enabled}
-		if not isTBCC then CompactUnitFrame_UpdateHealPrediction(playerButton) end
 	end
 end
 
@@ -147,33 +160,38 @@ healthBar.UNIT_HEAL_PREDICTION = healthBar.UNIT_HEALTH --TBC compability, isTBCC
 healthBar.UNIT_ABSORB_AMOUNT_CHANGED = healthBar.UNIT_HEALTH --TBC compability, isTBCC
 healthBar.UNIT_HEAL_ABSORB_AMOUNT_CHANGED = healthBar.UNIT_HEALTH --TBC compability, isTBCC
 
-healthBar.UnregisterEvents = function()
-	healthBar:UnregisterAllEvents()
+healthBar.Disable = function(self, playerButton)
+	self:UnregisterAllEvents()
+	playerButton.healthBar:Hide()
 end
 
 
-healthBar.ApplySettings = function(config)
-	self.healthBar:SetStatusBarTexture(LSM:Fetch("statusbar", config.HealthBar_Texture))--self.healthBar:SetStatusBarTexture(137012)
-	self.healthBar.Background:SetVertexColor(unpack(config.HealthBar_Background))
+healthBar.ApplySettings = function(self, playerButton, config)
+	playerButton.healthBar.config = config
+	playerButton.healthBar:SetStatusBarTexture(LSM:Fetch("statusbar", config.HealthBar_Texture))--self.healthBar:SetStatusBarTexture(137012)
+	playerButton.healthBar.Background:SetVertexColor(unpack(config.HealthBar_Background))
 end
 
 
 
-healthBar.NewPlayer = function(playerButton)
+healthBar.NewPlayer = function(self, playerButton)
 	local color = playerButton.PlayerClassColor
 	playerButton.healthBar:SetStatusBarColor(color.r,color.g,color.b)
 	playerButton.healthBar:SetMinMaxValues(0, 1)
 	playerButton.healthBar:SetValue(1)
 end
 
-healthBar.Reset = function(playerButton)
+healthBar.Reset = function(self, playerButton)
 	playerButton.healthBar:SetMinMaxValues(0, 1)
 	playerButton.healthBar:SetValue(1)
 end
 
-healthBar.Update = function(playerButton, unitID)
+healthBar.Update = function(self, playerButton, unitID)
 	playerButton.healthBar:SetMinMaxValues(0, UnitHealthMax(unitID))
 	playerButton.healthBar:SetValue(UnitHealth(unitID))
+	playerButton.displayedUnit = unitID
+	playerButton.optionTable = {displayHealPrediction = playerButton.bgSizeConfig.HealthBar_HealthPrediction_Enabled}
+	if not isTBCC then CompactUnitFrame_UpdateHealPrediction(playerButton) end
 end
 
 

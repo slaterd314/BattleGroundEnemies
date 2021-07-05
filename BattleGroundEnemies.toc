@@ -37,8 +37,10 @@ Changelog.lua
 Modules\Auracontainer.lua
 Modules\DR.lua
 Modules\ObjectiveAndRespawn.lua
+Modules\HealthBar.lua
 Modules\Racial.lua
 Modules\Trinket.lua
+Modules\Power.lua
 
 Testmode.lua
 Options.lua

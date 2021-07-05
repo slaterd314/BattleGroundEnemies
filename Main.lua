@@ -120,11 +120,13 @@ BattleGroundEnemies.Modules = {}
 
 function BattleGroundEnemies:RegisterModule(name, defaultSettings, options)
 	if self.Modules[name] then return error("module "..name.."is already registered") end
+	local frame = CreateFrame("frame")
 	self.Modules[name] = {
 		defaultSettings = defaultSettings or {},
-		options = options or {}
+		options = options or {},
+		frame = frame
 	}
-	return CreateFrame("frame")
+	return frame
 end
 
 
@@ -343,7 +345,7 @@ function BattleGroundEnemies:UnregisterEvents()
 		self:UnregisterEvent(self.GeneralEvents[i])
 	end
 	if isTBCC then 
-		for i = 1, #self.TBCEvents do
+		for i = 1, #self.TBCCEvents do
 			self:UnregisterEvent(self.TBCEvents[i])
 		end
 	end
@@ -550,11 +552,10 @@ function BattleGroundEnemies:BGSizeCheck(newBGSize)
 			end
 		else
 			if newBGSize <= 5 then
+				self.Allies:RemoveAllPlayers()
+				self.Enemies:RemoveAllPlayers()
 				if not self.BGSize or self.BGSize ~= 5 then --arena
-					self.Allies:RemoveAllPlayers()
-					self.Enemies:RemoveAllPlayers()
 					self:BGSizeChanged(5)
-					
 				end
 			else
 				if not self.BGSize or self.BGSize ~= 15 then
@@ -580,6 +581,11 @@ do
 			self.UnitIDs.OnUpdate = i
 		end
 		if not UnitExists(unitIDs.Active) then return end
+
+		for moduleName, module in pairs(BattleGroundEnemies.Modules) do
+			module.frame:Update(self, unitIDs.Active)
+		end
+
 		self:UpdateRaidTargetIcon()
 		self:UpdateHealth(unitIDs.Active)
 		self:UpdatePower(unitIDs.Active)
@@ -763,6 +769,16 @@ do
 		self.Power.Background:SetVertexColor(unpack(conf.PowerBar_Background))
 		
 		-- health
+
+		for moduleName, module in pairs(BattleGroundEnemies.Modules) do
+			if conf[moduleName].Enabled then
+				module.frame:Enable(playerButton)
+				module.frame:ApplySettings(self, conf[moduleName])
+			else
+				module.frame:Disable(playerButton)
+			end
+		end
+
 		self.healthBar:SetStatusBarTexture(LSM:Fetch("statusbar", conf.HealthBar_Texture))--self.healthBar:SetStatusBarTexture(137012)
 		self.healthBar.Background:SetVertexColor(unpack(conf.HealthBar_Background))
 		
@@ -914,6 +930,9 @@ do
 		end
 		self.healthBar:SetMinMaxValues(0, UnitHealthMax(unitID))
 		self.healthBar:SetValue(UnitHealth(unitID))
+		self.displayedUnit = unitID
+		self.optionTable = {displayHealPrediction = self.bgSizeConfig.HealthBar_HealthPrediction_Enabled}
+		if not isTBCC then CompactUnitFrame_UpdateHealPrediction(self) end
 	end
 
 	function buttonFunctions:ApplyRangeIndicatorSettings()
@@ -1049,10 +1068,6 @@ do
 			self:CheckForNewPowerColor(powerToken)
 		end
 		self.Power:SetValue(UnitPower(unitID)/UnitPowerMax(unitID))
-	end
-
-	function buttonFunctions:SetAlphaOfRangeFrames(alpha)
-		
 	end
 	
 	function buttonFunctions:UpdateRange(inRange)
@@ -1673,6 +1688,10 @@ do
 			playerButton.Covenant:Reset()
 			playerButton.NumericTargetindicator:SetText(0) --reset testmode
 
+			for moduleName, module in pairs(BattleGroundEnemies.Modules) do
+				module.frame:Reset()
+			end
+
 			if playerButton.UnitIDs then
 				wipe(playerButton.UnitIDs.TargetedByEnemy)  
 				playerButton:UpdateTargetIndicators()
@@ -1894,6 +1913,11 @@ do
 			playerButton.Power.Background:SetTexture("Interface/Buttons/WHITE8X8")
 			
 			-- health name it healthBar, to use Blizzard code from UnitFrame.lua  CompactUnitFrame_UpdateHealPrediction
+
+			for moduleName, module in pairs(BattleGroundEnemies.Modules) do
+			 module.frame:AttachToButton(playerButton)
+			end
+
 			playerButton.healthBar = CreateFrame('StatusBar', nil, playerButton)
 			playerButton.healthBar:SetPoint('BOTTOMLEFT', playerButton.Power, "TOPLEFT")
 			playerButton.healthBar:SetPoint('TOPRIGHT', playerButton, "TOPRIGHT")
@@ -2115,10 +2139,16 @@ do
 		if playerButton.PlayerLevel then playerButton:SetLevel(playerButton.PlayerLevel) end --for testmode
 
 		
+		for moduleName, module in pairs(BattleGroundEnemies.Modules) do
+			module.frame:NewPlayer(playerButton)
+		end
+
 		local color = playerButton.PlayerClassColor
 		playerButton.healthBar:SetStatusBarColor(color.r,color.g,color.b)
 		playerButton.healthBar:SetMinMaxValues(0, 1)
 		playerButton.healthBar:SetValue(1)
+
+		
 
 		playerButton.totalAbsorbOverlay:Hide()
 		playerButton.totalAbsorb:Hide()
@@ -2367,8 +2397,8 @@ do
 
 
 
-	
-	function BattleGroundEnemies:PLAYER_LOGIN()
+	local switch = false
+	function BattleGroundEnemies:PLAYER_LOGIN()		
 		self.PlayerDetails = {
 			PlayerName = UnitName("player"),
 			PlayerClass = select(2, UnitClass("player")),
@@ -2378,8 +2408,16 @@ do
 			GUID = UnitGUID("player")
 		}
 		
-		for moduleName, moduleData in pairs(self.Modules) do
-			Mixin(Data.defaultSettings.profile, {moduleName = {moduleData.defaultSettings}})
+
+		local playerType = {"Enemies", "Allies"}
+		local BGSizes = {"5", "15", "40"}
+		for moduleName, module in pairs(self.Modules) do
+			for i = 1, #playerType do
+				for j = 1, #BGSizes do
+					Data.defaultSettings.profile[playerType[i]][BGSizes[j]].Modules = Data.defaultSettings.profile[playerType[i]][BGSizes[j]].Modules or {}
+					Data.defaultSettings.profile[playerType[i]][BGSizes[j]].Modules[moduleName] = module.defaultSettings 
+				end
+			end
 		end
 
 		self.db = LibStub("AceDB-3.0"):New("BattleGroundEnemiesDB", Data.defaultSettings, true)
@@ -2419,12 +2457,10 @@ do
 end
 
 function BattleGroundEnemies.Enemies:ChangeName(oldName, newName)  --only used in arena when players switch from "arenaX" to a real name
-	print("ChangeName")
 	local playerButton = self.Players[oldName]
 	if playerButton then
 		playerButton.PlayerName = newName
 		playerButton:SetName()
-		print("ChangeName", oldName, newName)
 		
 
 		self.Players[newName] = playerButton
@@ -2434,10 +2470,8 @@ end
 
 
 function BattleGroundEnemies.Enemies:CreateOrUpdateArenaEnemyPlayer(unitID, name, race, classTag, specName)
-	print("CreateOrUpdateArenaEnemyPlayer", unitID, name, race, classTag, specName)
 	local playerName
 	if name and name ~= UNKNOWN then
-		print("CreateOrUpdateArenaEnemyPlayer name change", UNKNOWN)
 		-- player has a real name know, check if he is already shown as arenaX
 
 		BattleGroundEnemies.Enemies:ChangeName(unitID, name)
@@ -2460,9 +2494,6 @@ end
 
 local activeCreateArenaEnemiesTimer
 function BattleGroundEnemies.Enemies:CreateArenaEnemies()
-	print("CreateArenaEnemies")
-	print("IsInArena", IsInArena, IsInBrawl())
-	print("InCombatLockdown()")
 	if not IsInArena or IsInBrawl() then return end
 	if InCombatLockdown() then 
 		if not activeCreateArenaEnemiesTimer then
@@ -2478,7 +2509,6 @@ function BattleGroundEnemies.Enemies:CreateArenaEnemies()
 	wipe(self.NewPlayerDetails)
 	for i = 1, 5 do
 		local unitID = "arena"..i
-		print("unitID", unitID)
 		local name, realm = UnitName(unitID)
 
 		local _, classTag, specName
@@ -2487,25 +2517,22 @@ function BattleGroundEnemies.Enemies:CreateArenaEnemies()
 			name = name.."-"..realm
 		end			
 				
-		print("name", name)
 
-		local specID, gender = GetArenaOpponentSpec(i)
-		print("specID", specID)
-		print("gender", gender)
-
-
-		if (specID and specID > 0) then 
-			_, specName, _, _, _, classTag, _ = GetSpecializationInfoByID(specID, gender)
-			print("specName", specName)
-			print("classTag", classTag)
+		local specName, classTag
+		if not isTBCC then
+			local specID, gender = GetArenaOpponentSpec(i)
+	
+			if (specID and specID > 0) then 
+				_, specName, _, _, _, classTag, _ = GetSpecializationInfoByID(specID, gender)
+			end
+		else 
+			classTag = select(2, UnitClass(unitID))
 		end
-		
+	
 	
 		local raceName = UnitRace(unitID)
-		print("raceName", raceName)
 
 		if (specName or isTBCC) and classTag then
-			print("CreateOrUpdateArenaEnemyPlayer")
 			self:CreateOrUpdateArenaEnemyPlayer(unitID, name, raceName or "placeholder", classTag, specName)
 		end
 		
@@ -2522,7 +2549,6 @@ function BattleGroundEnemies.Enemies:UNIT_NAME_UPDATE(unitID)
 			name = name.."-"..realm
 		end
 	end
-	print("UNIT_NAME_UPDATE", unitID, name)
 	self:ChangeName(unitID, name)
 end
 
@@ -2597,7 +2623,6 @@ end
 
 --fires when a arena enemy appears and a frame is ready to be shown
 function BattleGroundEnemies:ARENA_OPPONENT_UPDATE(unitID, unitEvent)
-	print("ARENA_OPPONENT_UPDATE", unitID, unitEvent)
 	--unitEvent can be: "seen", "unseen", "destroyed", "cleared"
 	--self:Debug("ARENA_OPPONENT_UPDATE", unitID, unitEvent, UnitName(unitID))
 	
@@ -2865,8 +2890,7 @@ function BattleGroundEnemies:ARENA_CROWD_CONTROL_SPELL_UPDATE(unitID, ...)
 end
 
 
---fires when a arenaX enemy used a trinket or racial to break cc, C_PvP.GetArenaCrowdControlInfo(unitID) shoudl be called afterwards to get used CCs
---this event is kinda stupid, it doesn't say which unit used which cooldown, it justs says that somebody used some sort of trinket
+
 function BattleGroundEnemies:ARENA_COOLDOWNS_UPDATE()
 
 	--if not self.db.profile.Trinket then return end
@@ -2917,9 +2941,6 @@ function BattleGroundEnemies:UNIT_HEALTH(unitID) --gets health of nameplates, pl
 	local playerButton = self:GetPlayerbuttonByUnitID(unitID)
 	if playerButton and playerButton.isShown then --unit is a shown player
 		playerButton:UpdateHealth(unitID)
-		playerButton.displayedUnit = unitID
-		playerButton.optionTable = {displayHealPrediction = playerButton.bgSizeConfig.HealthBar_HealthPrediction_Enabled}
-		if not isTBCC then CompactUnitFrame_UpdateHealPrediction(playerButton) end
 	end
 end
 
@@ -3075,6 +3096,15 @@ do
 					CurrentMapID = mapID
 				end
 				
+
+
+				--Check if we joined a match late and there are already arena unitids (flag-, orb-, or minecart-carriers) we wont get a ARENA_OPPONENT_UPDATE 
+				numArenaOpponents = GetNumArenaOpponents()-- returns valid data on PLAYER_ENTERING_WORLD
+				--self:Debug(numArenaOpponents)
+				if numArenaOpponents > 0 then 
+					C_Timer.After(2, ArenaEnemiesAtBeginn)
+				end
+
 				--self:Debug("test")
 				if IsInArena and not IsInBrawl() then
 
@@ -3105,12 +3135,7 @@ do
 				
 				BattleGroundEnemies.BattleGroundDebuffs = Data.BattlegroundspezificDebuffs[CurrentMapID]
 				
-				--Check if we joined a match late and there are already arena unitids (flag-, orb-, or minecart-carriers) we wont get a ARENA_OPPONENT_UPDATE 
-				numArenaOpponents = GetNumArenaOpponents()-- returns valid data on PLAYER_ENTERING_WORLD
-				--self:Debug(numArenaOpponents)
-				if numArenaOpponents > 0 then 
-					C_Timer.After(2, ArenaEnemiesAtBeginn)
-				end
+				
 				
 				BattleGroundEnemies:ToggleArenaFrames()
 				
@@ -3308,8 +3333,9 @@ do
 			-- we are in a party, 5 man group
 			local unitIDPrefix = "party"
 			local numGroupMembers = GetNumGroupMembers()
-			self.Allies:UpdatePlayerCount(numGroupMembers + 1)
 			self:BGSizeCheck(numGroupMembers + 1)
+			self.Allies:UpdatePlayerCount(numGroupMembers + 1)
+			
 
 			for i = 1, numGroupMembers do
 				local unitID = unitIDPrefix..i

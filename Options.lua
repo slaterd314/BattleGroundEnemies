@@ -91,10 +91,6 @@ end
 
 
 local function setOption(location, option, ...)
-
-
-	
-
 	local value
 	if option.type == "color" then
 		value = {...}   -- local r, g, b, alpha = ...
@@ -1634,7 +1630,45 @@ local function addEnemyAndAllySettings(self)
 				}
 			}
 		}
+
+		local moduleSettings = {}
+
+		local moduleCount = 1
+		for moduleName, moduleData in pairs(BattleGroundEnemies.Modules) do
+			local location = BattleGroundEnemies.db.profile[playerType][BGSize][moduleName]
+			moduleSettings[moduleName] = {
+				type = "group",
+				name = moduleName,
+				desc = moduleName.." Settings",
+				--childGroups = "tab",
+				order = moduleCount,
+				get =  function(option)
+					return getOption(location, option)
+				end,
+				set = function(option, ...) 
+					return setOption(location, option, ...)
+				end,
+				args = moduleData.options
+			}
+			moduleCount = moduleCount + 1
+		end
+	
+
+		settings[BGSize].args.BarSettings.args.Modules = {
+			type = "group",
+			name = "Modules",
+			desc = "module Settings",
+			disabled = function() return not location.Enabled end,
+			--childGroups = "tab",
+			order = 10,
+			args = moduleSettings or {}
+		}
+
 	end
+
+	
+	
+
 	local BGSize = "15"
 	
 	settings["15"].args.BarSettings.args.ObjectiveAndRespawnSettings = {
@@ -1688,6 +1722,7 @@ end
 
 function BattleGroundEnemies:SetupOptions()
 	local location = self.db.profile
+	print("SetupOptions")
 	self.options = {
 		type = "group",
 		name = "BattleGroundEnemies " .. GetAddOnMetadata(addonName, "Version"),
@@ -1985,7 +2020,6 @@ function BattleGroundEnemies:SetupOptions()
 				order = 5,
 				args = addEnemyAndAllySettings(self.Allies)
 			}
-
 		}
 	}
 
