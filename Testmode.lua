@@ -20,6 +20,9 @@ local randomRacials = {} -- key = number, value = spellID
 local harmfulPlayerSpells = {} --key = number, value = spellID
 local helpfulPlayerSpells = {} --key = number, value = spellID
 local FakePlayersOnUpdateFrame = CreateFrame("frame")
+
+local moduleCount = 0
+local modules = {}
 FakePlayersOnUpdateFrame:Hide()
 
 
@@ -151,6 +154,8 @@ do
 			TestmodeRanOnce = true
 		end
 		
+
+		self:BGSizeCheck(self.BGSize)
 		wipe(fakePlayers)
 		
 		wipe(harmfulPlayerSpells)
@@ -176,10 +181,22 @@ do
 				end 
 			end
 		end
+
+		moduleCount = 0
+		wipe(modules)
+		for moduleName, module in pairs(BattleGroundEnemies.Enemies.Modules) do
+			moduleCount = moduleCount + 1
+			tinsert(modules, module)
+		end
+
 		self:FillData()
+
+		print("FillData")
 		
 		self:Show()
-		self:BGSizeCheck(self.BGSize)
+
+		print("self.BGSize", self.BGSize)
+		
 
 		FakePlayersOnUpdateFrame:Show()
 	end
@@ -205,6 +222,14 @@ do
 				for name, playerButton in pairs(playerType.Players) do
 					
 					local number = mathrandom(1,10)
+
+					local module = modules[number]
+					if module then
+						if playerButton[module.name].Enabled then
+							module.frame:Test(playerButton)
+						end
+					end
+
 					--self:Debug("number", number)
 					
 					--self:Debug(playerButton.ObjectiveAndRespawn.Cooldown:GetCooldownDuration())
@@ -248,18 +273,7 @@ do
 								hasFlag = true
 							
 							-- trinket simulation
-							elseif number == 2 and playerButton.Trinket.Cooldown:GetCooldownDuration() == 0 then -- trinket used
-								local spellID = randomTrinkets[mathrandom(1, #randomTrinkets)] 
-								if spellID ~= 214027 then --adapted
-									if spellID == 196029 then--relentless
-										playerButton.Trinket:TrinketCheck(spellID, false)
-									else
-										playerButton.Trinket:TrinketCheck(spellID, true)
-									end
-								end
 							--racial simulation
-							elseif number == 3 and playerButton.Racial.Cooldown:GetCooldownDuration() == 0 then -- racial used
-								playerButton.Racial:RacialUsed(randomRacials[mathrandom(1, #randomRacials)])
 							elseif number == 4 then --player got an diminishing CC applied
 								--self:Debug("Nummber4")
 								local dRCategory = Data.RandomDrCategory[mathrandom(1, #Data.RandomDrCategory)]

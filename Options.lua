@@ -10,6 +10,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 local CTimerNewTicker = C_Timer.NewTicker
 
+Data.optionHelpers = {}
 
 local function copy(obj)
 	if type(obj) ~= 'table' then return obj end
@@ -106,7 +107,7 @@ local function setOption(location, option, ...)
 end
 
 
-local function addVerticalSpacing(order)
+function Data.optionHelpers.addVerticalSpacing(order)
 	local verticalSpacing = {
 		type = "description",
 		name = " ",
@@ -117,7 +118,7 @@ local function addVerticalSpacing(order)
 	return verticalSpacing
 end
 
-local function addHorizontalSpacing(order)
+function Data.optionHelpers.addHorizontalSpacing(order)
 	local horizontalSpacing = {
 		type = "description",
 		name = " ",
@@ -128,13 +129,18 @@ local function addHorizontalSpacing(order)
 end
 
 
-local function addIconPositionSettings(location, optionname)
-	local size = optionname.."_Size"
-	local horizontalDirection = optionname.."_HorizontalGrowDirection"
-	local horizontalSpacing	= optionname.."_HorizontalSpacing"
-	local verticalDirection = optionname.."_VerticalGrowdirection"
-	local verticalSpacing =	optionname.."_VerticalSpacing"
-	local iconsPerRow = optionname.."_IconsPerRow"
+function Data.optionHelpers.addIconPositionSettings(location, optionname)
+	if optionname then 
+		optionname = optionname .."_" 
+	else
+		optionname = ""
+	end
+	local size = optionname.."Size"
+	local horizontalDirection = optionname.."HorizontalGrowDirection"
+	local horizontalSpacing	= optionname.."HorizontalSpacing"
+	local verticalDirection = optionname.."VerticalGrowdirection"
+	local verticalSpacing =	optionname.."VerticalSpacing"
+	local iconsPerRow = optionname.."IconsPerRow"
 	
 	local options = {
 		[size] = {
@@ -153,7 +159,7 @@ local function addIconPositionSettings(location, optionname)
 			step = 1,
 			order = 2
 		},
-		Fake = addVerticalSpacing(3),
+		Fake = Data.optionHelpers.addVerticalSpacing(3),
 		[horizontalDirection] = {
 			type = "select",
 			name = L.HorizontalGrowdirection,
@@ -169,7 +175,7 @@ local function addIconPositionSettings(location, optionname)
 			step = 1,
 			order = 5
 		},
-		Fake1 = addVerticalSpacing(6),
+		Fake1 = Data.optionHelpers.addVerticalSpacing(6),
 		[verticalDirection] = {
 			type = "select",
 			name = L.VerticalGrowdirection,
@@ -191,12 +197,17 @@ end
 
 
 -- all positions, corners, middle, left etc.
-local function addContainerPositionSettings(location, optionname)
-	local point = optionname.."_Point"
-	local relativeTo = optionname.."_RelativeTo"
-	local relativePoint = optionname.."_RelativePoint"
-	local ofsx = optionname.."_OffsetX"
-	local ofsy = optionname.."_OffsetY"
+function Data.optionHelpers.addContainerPositionSettings(location, optionname)
+	if optionname then 
+		optionname = optionname .."_" 
+	else
+		optionname = ""
+	end
+	local point = optionname.."Point"
+	local relativeTo = optionname.."RelativeTo"
+	local relativePoint = optionname.."RelativePoint"
+	local ofsx = optionname.."OffsetX"
+	local ofsy = optionname.."OffsetY"
 	
 	local options = {
 		[point] = {
@@ -213,7 +224,7 @@ local function addContainerPositionSettings(location, optionname)
 			values = Data.Frames,
 			order = 2
 		},
-		Fake = addVerticalSpacing(3),
+		Fake = Data.optionHelpers.addVerticalSpacing(3),
 		[relativePoint] = {
 			type = "select",
 			name = L.PointAtObject,
@@ -242,12 +253,17 @@ local function addContainerPositionSettings(location, optionname)
 end
 
 -- sets 2 points, user can choose left and right, 1 point at TOP..setting, and another point BOTTOM..setting is set
-local function addBasicPositionSettings(location, optionname)
-	local point = optionname.."_BasicPoint"
-	local relativeTo = optionname.."_RelativeTo"
-	local relativePoint = optionname.."_RelativePoint"
-	local ofsx = optionname.."_OffsetX"
-	local ofsy = optionname.."_OffsetY"
+function Data.optionHelpers.addBasicPositionSettings(location, optionname)
+	if optionname then 
+		optionname = optionname .."_" 
+	else
+		optionname = ""
+	end
+	local point = optionname.."BasicPoint"
+	local relativeTo = optionname.."RelativeTo"
+	local relativePoint = optionname.."RelativePoint"
+	local ofsx = optionname.."OffsetX"
+	local ofsy = optionname.."OffsetY"
 	
 	local options = {
 		[point] = {
@@ -264,7 +280,7 @@ local function addBasicPositionSettings(location, optionname)
 			values = Data.Frames,
 			order = 2
 		},
-		Fake = addVerticalSpacing(3),
+		Fake = Data.optionHelpers.addVerticalSpacing(3),
 		[relativePoint] = {
 			type = "select",
 			name = L.SideAtObject,
@@ -284,12 +300,17 @@ local function addBasicPositionSettings(location, optionname)
 	return options
 end
 
-local function addNormalTextSettings(location, optionname)
-	local fontsize = optionname.."_Fontsize"
-	local textcolor = optionname.."_Textcolor"
-	local outline = optionname.."_Outline"
-	local enableTextShadow = optionname.."_EnableTextshadow"
-	local textShadowcolor = optionname.."_TextShadowcolor"
+function Data.optionHelpers.addNormalTextSettings(location, optionname)
+	if optionname then 
+		optionname = optionname .."_" 
+	else
+		optionname = ""
+	end
+	local fontsize = optionname.."Fontsize"
+	local textcolor = optionname.."Textcolor"
+	local outline = optionname.."Outline"
+	local enableTextShadow = optionname.."EnableTextshadow"
+	local textShadowcolor = optionname.."TextShadowcolor"
 		
 	local options = {
 		[fontsize] = {
@@ -309,7 +330,7 @@ local function addNormalTextSettings(location, optionname)
 			values = Data.FontOutlines,
 			order = 2
 		},
-		Fake = addVerticalSpacing(3),
+		Fake = Data.optionHelpers.addVerticalSpacing(3),
 		[textcolor] = {
 			type = "color",
 			name = L.Fontcolor,
@@ -339,12 +360,17 @@ local function addNormalTextSettings(location, optionname)
 end
 
 
-local function addCooldownTextsettings(location, optionname)
-	local showNumbers = optionname.."_ShowNumbers"
-	local fontsize = optionname.."_Cooldown_Fontsize"
-	local outline = optionname.."_Cooldown_Outline"
-	local enableTextShadow = optionname.."_Cooldown_EnableTextshadow"
-	local textShadowcolor = optionname.."_Cooldown_TextShadowcolor"	
+function Data.optionHelpers.addCooldownTextsettings(location, optionname)
+	if optionname then 
+		optionname = optionname .."_" 
+	else
+		optionname = ""
+	end
+	local showNumbers = optionname.."ShowNumbers"
+	local fontsize = optionname.."Cooldown_Fontsize"
+	local outline = optionname.."Cooldown_Outline"
+	local enableTextShadow = optionname.."Cooldown_EnableTextshadow"
+	local textShadowcolor = optionname.."Cooldown_TextShadowcolor"	
 
 	local options = {
 		[showNumbers] = {
@@ -380,7 +406,7 @@ local function addCooldownTextsettings(location, optionname)
 					values = Data.FontOutlines,
 					order = 4
 				},
-				Fake1 = addVerticalSpacing(5),
+				Fake1 = Data.optionHelpers.addVerticalSpacing(5),
 				[enableTextShadow] = {
 					type = "toggle",
 					name = L.FontShadow_Enabled,
@@ -429,9 +455,9 @@ local function addEnemyAndAllySettings(self)
 				desc = "test",
 				order = 1
 			},
-			Fake = addHorizontalSpacing(2),
-			Fake1 = addHorizontalSpacing(3),
-			Fake2 = addHorizontalSpacing(4),
+			Fake = Data.optionHelpers.addHorizontalSpacing(2),
+			Fake1 = Data.optionHelpers.addHorizontalSpacing(3),
+			Fake2 = Data.optionHelpers.addHorizontalSpacing(4),
 			CopySettings = {
 				type = "execute",
 				name = L.CopySettings:format(L[oppositePlayerType]),
@@ -479,7 +505,7 @@ local function addEnemyAndAllySettings(self)
 						step = 0.05,
 						order = 3
 					},
-					Fake = addVerticalSpacing(4),
+					Fake = Data.optionHelpers.addVerticalSpacing(4),
 					RangeIndicator_Everything = {
 						type = "toggle",
 						name = L.RangeIndicator_Everything,
@@ -524,7 +550,7 @@ local function addEnemyAndAllySettings(self)
 						width = "normal",
 						order = 2
 					},
-					Fake = addVerticalSpacing(3),
+					Fake = Data.optionHelpers.addVerticalSpacing(3),
 					LevelTextSettings = {
 						type = "group",
 						name = L.LevelTextSettings,
@@ -549,7 +575,7 @@ local function addEnemyAndAllySettings(self)
 								disabled = function() return not location.LevelText_Enabled end,
 								inline = true,
 								order = 3,
-								args = addNormalTextSettings(location, "LevelText")
+								args = Data.optionHelpers.addNormalTextSettings(location, "LevelText")
 							}
 						}
 					}
@@ -669,7 +695,7 @@ local function addEnemyAndAllySettings(self)
 					desc = "test",
 					order = 1
 				},
-				Fake = addHorizontalSpacing(2),
+				Fake = Data.optionHelpers.addHorizontalSpacing(2),
 				CopySettings = {
 					type = "execute",
 					name = L.CopySettings:format(L[oppositePlayerType]..": "..L["BGSize_"..BGSize]),
@@ -717,7 +743,7 @@ local function addEnemyAndAllySettings(self)
 									disabled = function() return not location.PlayerCount_Enabled end,
 									inline = true,
 									order = 2,
-									args = addNormalTextSettings(location, "PlayerCount")
+									args = Data.optionHelpers.addNormalTextSettings(location, "PlayerCount")
 								}
 							}
 						}
@@ -821,7 +847,7 @@ local function addEnemyAndAllySettings(self)
 											width = "normal",
 											order = 1
 										},
-										Fake = addHorizontalSpacing(2),
+										Fake = Data.optionHelpers.addHorizontalSpacing(2),
 										HealthBar_Background = {
 											type = "color",
 											name = L.BarBackground,
@@ -830,7 +856,7 @@ local function addEnemyAndAllySettings(self)
 											width = "normal",
 											order = 3
 										},
-										Fake = addVerticalSpacing(4),
+										Fake = Data.optionHelpers.addVerticalSpacing(4),
 										HealthBar_HealthPrediction_Enabled = {
 											type = "toggle",
 											name = COMPACT_UNIT_FRAME_PROFILE_DISPLAYHEALPREDICTION,
@@ -851,7 +877,7 @@ local function addEnemyAndAllySettings(self)
 											--desc = L.TrinketSettings_Desc,
 											inline = true,
 											order = 1,
-											args = addNormalTextSettings(location, "Name")
+											args = Data.optionHelpers.addNormalTextSettings(location, "Name")
 										},
 									}
 								},
@@ -949,9 +975,9 @@ local function addEnemyAndAllySettings(self)
 											disabled = function() return not location.NumericTargetindicator_Enabled end,
 											inline = true,
 											order = 2,
-											args = addNormalTextSettings(location, "NumericTargetindicator")
+											args = Data.optionHelpers.addNormalTextSettings(location, "NumericTargetindicator")
 										},
-										Fake2 = addVerticalSpacing(3),
+										Fake2 = Data.optionHelpers.addVerticalSpacing(3),
 										SymbolicTargetindicator_Enabled = {
 											type = "toggle",
 											name = L.SymbolicTargetindicator_Enabled,
@@ -996,7 +1022,7 @@ local function addEnemyAndAllySettings(self)
 									width = "normal",
 									order = 3
 								},
-								Fake = addHorizontalSpacing(4),
+								Fake = Data.optionHelpers.addHorizontalSpacing(4),
 								PowerBar_Background = {
 									type = "color",
 									name = L.BarBackground,
@@ -1025,7 +1051,7 @@ local function addEnemyAndAllySettings(self)
 									name = L.Position,
 									disabled = function() return not location.Trinket_Enabled end,
 									order = 2,
-									args = addBasicPositionSettings(location, "Trinket")
+									args = Data.optionHelpers.addBasicPositionSettings(location, "Trinket")
 								},
 								Trinket_Width = {
 									type = "range",
@@ -1043,7 +1069,7 @@ local function addEnemyAndAllySettings(self)
 									--desc = L.TrinketSettings_Desc,
 									disabled = function() return not location.Trinket_Enabled end,
 									order = 4,
-									args = addCooldownTextsettings(location, "Trinket")
+									args = Data.optionHelpers.addCooldownTextsettings(location, "Trinket")
 								}
 							}
 						},
@@ -1064,7 +1090,7 @@ local function addEnemyAndAllySettings(self)
 									name = L.Position,
 									disabled = function() return not location.Racial_Enabled end,
 									order = 2,
-									args = addBasicPositionSettings(location, "Racial")
+									args = Data.optionHelpers.addBasicPositionSettings(location, "Racial")
 								},
 								Racial_Width = {
 									type = "range",
@@ -1082,7 +1108,7 @@ local function addEnemyAndAllySettings(self)
 									--desc = L.TrinketSettings_Desc,
 									disabled = function() return not location.Racial_Enabled end,
 									order = 4,
-									args = addCooldownTextsettings(location, "Racial")
+									args = Data.optionHelpers.addCooldownTextsettings(location, "Racial")
 								},
 								RacialFilteringSettings = {
 									type = "group",
@@ -1099,7 +1125,7 @@ local function addEnemyAndAllySettings(self)
 											width = 'normal',
 											order = 1
 										},
-										Fake = addHorizontalSpacing(2),
+										Fake = Data.optionHelpers.addHorizontalSpacing(2),
 										RacialFiltering_Filterlist = {
 											type = "multiselect",
 											name = L.Filtering_Filterlist,
@@ -1144,14 +1170,14 @@ local function addEnemyAndAllySettings(self)
 									step = 1,
 									order = 2
 								},
-								Fake = addVerticalSpacing(3),
+								Fake = Data.optionHelpers.addVerticalSpacing(3),
 								Spec_AuraDisplay_Enabled = {
 									type = "toggle",
 									name = L.Spec_AuraDisplay_Enabled,
 									desc = L.Spec_AuraDisplay_Enabled_Desc,
 									order = 4,
 								},
-								Fake1 = addVerticalSpacing(5),
+								Fake1 = Data.optionHelpers.addVerticalSpacing(5),
 								Spec_AuraDisplay_CooldownTextSettings = {
 									type = "group",
 									name = L.Countdowntext,
@@ -1159,7 +1185,7 @@ local function addEnemyAndAllySettings(self)
 									disabled = function() return not location.Spec_AuraDisplay_Enabled end,
 									inline = true,
 									order = 6,
-									args = addCooldownTextsettings(location, "Spec_AuraDisplay")
+									args = Data.optionHelpers.addCooldownTextsettings(location, "Spec_AuraDisplay")
 								}
 							}
 						},
@@ -1180,7 +1206,7 @@ local function addEnemyAndAllySettings(self)
 									name = L.Position,
 									disabled = function() return not location.DrTracking_Enabled end,
 									order = 2,
-									args = addBasicPositionSettings(location, "DrTracking_Container")
+									args = Data.optionHelpers.addBasicPositionSettings(location, "DrTracking_Container")
 								},
 								DrTracking_HorizontalSpacing = {
 									type = "range",
@@ -1231,9 +1257,9 @@ local function addEnemyAndAllySettings(self)
 									--desc = L.TrinketSettings_Desc,
 									disabled = function() return not location.DrTracking_Enabled end,
 									order = 8,
-									args = addCooldownTextsettings(location, "DrTracking")
+									args = Data.optionHelpers.addCooldownTextsettings(location, "DrTracking")
 								},
-								Fake1 = addVerticalSpacing(6),
+								Fake1 = Data.optionHelpers.addVerticalSpacing(6),
 								DrTrackingFilteringSettings = {
 									type = "group",
 									name = FILTER,
@@ -1296,13 +1322,13 @@ local function addEnemyAndAllySettings(self)
 											name = L.BuffIcon,
 											disabled = function() return not location.Auras_Buffs_Enabled end,
 											order = 2,
-											args = addIconPositionSettings(location, "Auras_Buffs"),
+											args = Data.optionHelpers.addIconPositionSettings(location, "Auras_Buffs"),
 										},
 										Auras_Buffs_Container_PositioningSettings = {
 											type = "group",
 											name = L.ContainerPosition,
 											disabled = function() return not location.Auras_Buffs_Enabled end,
-											args = addContainerPositionSettings(location, "Auras_Buffs_Container"),
+											args = Data.optionHelpers.addContainerPositionSettings(location, "Auras_Buffs_Container"),
 											order = 3
 										},
 										Auras_Buffs_StacktextSettings = {
@@ -1311,7 +1337,7 @@ local function addEnemyAndAllySettings(self)
 											--desc = L.MyAuraSettings_Desc,
 											disabled = function() return not location.Auras_Buffs_Enabled end,
 											order = 4,
-											args = addNormalTextSettings(location, "Auras_Buffs")
+											args = Data.optionHelpers.addNormalTextSettings(location, "Auras_Buffs")
 										},
 										Auras_Buffs_CooldownTextSettings = {
 											type = "group",
@@ -1319,7 +1345,7 @@ local function addEnemyAndAllySettings(self)
 											--desc = L.TrinketSettings_Desc,
 											disabled = function() return not location.Auras_Buffs_Enabled end,
 											order = 5,
-											args = addCooldownTextsettings(location, "Auras_Buffs")
+											args = Data.optionHelpers.addCooldownTextsettings(location, "Auras_Buffs")
 										},
 										Auras_Buffs_FilteringSettings = {
 											type = "group",
@@ -1352,7 +1378,7 @@ local function addEnemyAndAllySettings(self)
 															},
 															order = 1
 														},
-														Fake1 = addVerticalSpacing(2),
+														Fake1 = Data.optionHelpers.addVerticalSpacing(2),
 														Auras_Buffs_CustomFilteringSettings = {
 															type = "group",
 															name = L.AurasCustomConditions,
@@ -1374,7 +1400,7 @@ local function addEnemyAndAllySettings(self)
 																	order = 1
 																},
 
-																Fake = addVerticalSpacing(2),
+																Fake = Data.optionHelpers.addVerticalSpacing(2),
 																Auras_Buffs_ShowMine = {
 																	type = "toggle",
 																	name = L.ShowMine,
@@ -1402,7 +1428,7 @@ local function addEnemyAndAllySettings(self)
 																	width = 'double',
 																	order = 9
 																},
-																Fake2 = addVerticalSpacing(10),
+																Fake2 = Data.optionHelpers.addVerticalSpacing(10),
 																Auras_Buffs_SpellIDFiltering_Filterlist = {
 																	type = "multiselect",
 																	name = L.Filtering_Filterlist,
@@ -1443,7 +1469,7 @@ local function addEnemyAndAllySettings(self)
 											desc = SHOW_DEBUFFS,
 											order = 1
 										},
-										Fake = addVerticalSpacing(2),
+										Fake = Data.optionHelpers.addVerticalSpacing(2),
 										Auras_Debuffs_Coloring_Enabled = {
 											type = "toggle",
 											name = L.Auras_Debuffs_Coloring_Enabled,
@@ -1463,13 +1489,13 @@ local function addEnemyAndAllySettings(self)
 											name = L.DebuffIcon,
 											disabled = function() return not (location.Auras_Debuffs_Enabled) end,
 											order = 5,
-											args = addIconPositionSettings(location, "Auras_Debuffs"),
+											args = Data.optionHelpers.addIconPositionSettings(location, "Auras_Debuffs"),
 										},
 										Auras_Debuffs_Container_PositioningSettings = {
 											type = "group",
 											name = L.ContainerPosition,
 											disabled = function() return not location.Auras_Debuffs_Enabled end,
-											args = addContainerPositionSettings(location, "Auras_Debuffs_Container"),
+											args = Data.optionHelpers.addContainerPositionSettings(location, "Auras_Debuffs_Container"),
 											order = 6
 										},
 										Auras_Debuffs_StacktextSettings = {
@@ -1478,7 +1504,7 @@ local function addEnemyAndAllySettings(self)
 											--desc = L.MyAuraSettings_Desc,
 											disabled = function() return not location.Auras_Debuffs_Enabled end,
 											order = 7,
-											args = addNormalTextSettings(location, "Auras_Debuffs")
+											args = Data.optionHelpers.addNormalTextSettings(location, "Auras_Debuffs")
 										},
 										Auras_Debuffs_CooldownTextSettings = {
 											type = "group",
@@ -1486,7 +1512,7 @@ local function addEnemyAndAllySettings(self)
 											--desc = L.TrinketSettings_Desc,
 											disabled = function() return not location.Auras_Debuffs_Enabled end,
 											order = 8,
-											args = addCooldownTextsettings(location, "Auras_Debuffs")
+											args = Data.optionHelpers.addCooldownTextsettings(location, "Auras_Debuffs")
 										},
 										Auras_Debuffs_FilteringSettings = {
 											type = "group",
@@ -1540,14 +1566,14 @@ local function addEnemyAndAllySettings(self)
 																	order = 1
 																},
 
-																Fake = addVerticalSpacing(2),
+																Fake = Data.optionHelpers.addVerticalSpacing(2),
 																Auras_Debuffs_ShowMine = {
 																	type = "toggle",
 																	name = L.ShowMine,
 																	desc = L.ShowMine_Desc:format(L.Debuffs),
 																	order = 4,
 																},
-																Fake1 = addVerticalSpacing(5),
+																Fake1 = Data.optionHelpers.addVerticalSpacing(5),
 																Auras_Debuffs_DebuffTypeFiltering_Enabled = {
 																	type = "toggle",
 																	name = L.DebuffType_Filtering,
@@ -1591,7 +1617,7 @@ local function addEnemyAndAllySettings(self)
 																	width = 'double',
 																	order = 9
 																},
-																Fake2 = addVerticalSpacing(10),
+																Fake2 = Data.optionHelpers.addVerticalSpacing(10),
 																Auras_Debuffs_SpellIDFiltering_Filterlist = {
 																	type = "multiselect",
 																	name = L.Filtering_Filterlist,
@@ -1613,13 +1639,9 @@ local function addEnemyAndAllySettings(self)
 																	order = 11
 																}
 															}
-		
 														}
-
 													}
 												}
-
-												
 											}
 										}
 									}
@@ -1634,23 +1656,49 @@ local function addEnemyAndAllySettings(self)
 		local moduleSettings = {}
 
 		local moduleCount = 1
-		for moduleName, moduleData in pairs(BattleGroundEnemies.Modules) do
-			local location = BattleGroundEnemies.db.profile[playerType][BGSize][moduleName]
-			moduleSettings[moduleName] = {
-				type = "group",
-				name = moduleName,
-				desc = moduleName.." Settings",
-				--childGroups = "tab",
-				order = moduleCount,
-				get =  function(option)
-					return getOption(location, option)
-				end,
-				set = function(option, ...) 
-					return setOption(location, option, ...)
-				end,
-				args = moduleData.options
-			}
-			moduleCount = moduleCount + 1
+		for moduleName, moduleData in pairs(BattleGroundEnemies[playerType].Modules) do
+			print("BattleGroundEnemies.db.profile", BattleGroundEnemies.db.profile)
+			print("playerType", playerType)
+
+			print("BGSize", BGSize)
+			print("moduleName", moduleName)
+
+			local moduleOptions = moduleData.options.All or moduleData.options[BGSize]
+			if moduleOptions then 
+				local location = BattleGroundEnemies.db.profile[playerType][BGSize].Modules[moduleName]
+				print("location", location)
+				moduleSettings[moduleName] = {
+					type = "group",
+					name = moduleName,
+					desc = moduleName.." Settings",
+					--childGroups = "tab",
+					order = moduleCount,
+					get =  function(option)
+						return getOption(location, option)
+					end,
+					set = function(option, ...) 
+						return setOption(location, option, ...)
+					end,
+					args = {
+						Enabled = {
+							type = "toggle",
+							name = ENABLE,
+							order = 1,
+							hidden = not moduleData.canBeDisabled
+						},
+						Settings = {
+							type = "group",
+							name = "",
+							desc = "",
+							order = 2,
+							disabled = function() return not location.Enabled end,
+							inline = true,
+							args = type(moduleOptions) == "function" and moduleOptions(location) or moduleOptions
+						}
+					}
+				}
+				moduleCount = moduleCount + 1
+			end
 		end
 	
 
@@ -1688,7 +1736,7 @@ local function addEnemyAndAllySettings(self)
 				name = L.Position,
 				disabled = function() return not location["15"].ObjectiveAndRespawn_ObjectiveEnabled end,
 				order = 2,
-				args = addBasicPositionSettings(location["15"], "ObjectiveAndRespawn")
+				args = Data.optionHelpers.addBasicPositionSettings(location["15"], "ObjectiveAndRespawn")
 			},
 			ObjectiveAndRespawn_Width = {
 				type = "range",
@@ -1707,7 +1755,7 @@ local function addEnemyAndAllySettings(self)
 				disabled = function() return not location["15"].ObjectiveAndRespawn_ObjectiveEnabled end,
 				inline = true,
 				order = 4,
-				args = addNormalTextSettings(location["15"], "ObjectiveAndRespawn")
+				args = Data.optionHelpers.addNormalTextSettings(location["15"], "ObjectiveAndRespawn")
 			}
 		}
 	}	
@@ -1817,7 +1865,7 @@ function BattleGroundEnemies:SetupOptions()
 						hasAlpha = true,
 						order = 8
 					},
-					Fake1 = addVerticalSpacing(10),
+					Fake1 = Data.optionHelpers.addVerticalSpacing(10),
 					ShowTooltips = {
 						type = "toggle",
 						name = L.ShowTooltips,
@@ -1957,7 +2005,7 @@ function BattleGroundEnemies:SetupOptions()
 								--desc = L.TrinketSettings_Desc,
 								disabled = function() return not location.RBG.ObjectiveAndRespawn_RespawnEnabled end,
 								order = 5,
-								args = addCooldownTextsettings(location.RBG, "ObjectiveAndRespawn")
+								args = Data.optionHelpers.addCooldownTextsettings(location.RBG, "ObjectiveAndRespawn")
 							}
 						}
 					},
@@ -2021,6 +2069,65 @@ function BattleGroundEnemies:SetupOptions()
 				args = addEnemyAndAllySettings(self.Allies)
 			}
 		}
+	}
+
+	local moduleSettings = {}
+
+	local moduleCount = 1
+	for moduleName, moduleData in pairs(BattleGroundEnemies[playerType].Modules) do
+		print("BattleGroundEnemies.db.profile", BattleGroundEnemies.db.profile)
+		print("playerType", playerType)
+
+		print("BGSize", BGSize)
+		print("moduleName", moduleName)
+
+		local moduleOptions = moduleData.options.RBG
+		if moduleOptions then 
+			local location = BattleGroundEnemies.db.profile.RBG.Modules[moduleName]
+			print("location", location)
+			moduleSettings[moduleName] = {
+				type = "group",
+				name = moduleName,
+				desc = moduleName.." Settings",
+				--childGroups = "tab",
+				order = moduleCount,
+				get =  function(option)
+					return getOption(location, option)
+				end,
+				set = function(option, ...) 
+					return setOption(location, option, ...)
+				end,
+				args = {
+					Enabled = {
+						type = "toggle",
+						name = ENABLE,
+						order = 1,
+						hidden = not moduleData.canBeDisabled
+					},
+					Settings = {
+						type = "group",
+						name = "",
+						desc = "",
+						order = 2,
+						disabled = function() return not location.Enabled end,
+						inline = true,
+						args = type(moduleOptions) == "function" and moduleOptions(location) or moduleOptions
+					}
+				}
+			}
+			moduleCount = moduleCount + 1
+		end
+	end
+
+
+	self.options.RBGSettings.args.Modules = {
+		type = "group",
+		name = "Modules",
+		desc = "module Settings",
+		disabled = function() return not location.Enabled end,
+		--childGroups = "tab",
+		order = 10,
+		args = moduleSettings or {}
 	}
 
 

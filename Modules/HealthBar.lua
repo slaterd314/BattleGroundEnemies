@@ -1,210 +1,220 @@
 
 local addonName, Data = ...
+
+local LSM = LibStub("LibSharedMedia-3.0")
+
+
 -- health name it healthBar, to use Blizzard code from UnitFrame.lua  CompactUnitFrame_UpdateHealPrediction
 local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 local isTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 local BattleGroundEnemies = BattleGroundEnemies
 local CompactUnitFrame_UpdateHealPrediction = CompactUnitFrame_UpdateHealPrediction
+local mathrandom = math.random
 
 local L = Data.L
 
-local function addVerticalSpacing(order)
-	local verticalSpacing = {
-		type = "description",
-		name = " ",
-		fontSize = "large",
-		width = "full",
-		order = order
-	}
-	return verticalSpacing
-end
-
-local function addHorizontalSpacing(order)
-	local horizontalSpacing = {
-		type = "description",
-		name = " ",
-		width = "half",	
-		order = order,
-	}
-	return horizontalSpacing
-end
 
 local defaults =  {
-	HealthBar_Texture = 'UI-StatusBar',
-	HealthBar_Background = {0, 0, 0, 0.66}
+	Enabled = true,
+	Texture = 'UI-StatusBar',
+	Background = {0, 0, 0, 0.66}
 }
 
 local options = {
-	HealthBar_Texture = {
-		type = "select",
-		name = L.BarTexture,
-		desc = L.HealthBar_Texture_Desc,
-		dialogControl = 'LSM30_Statusbar',
-		values = AceGUIWidgetLSMlists.statusbar,
-		width = "normal",
-		order = 1
-	},
-	Fake = addHorizontalSpacing(2),
-	HealthBar_Background = {
-		type = "color",
-		name = L.BarBackground,
-		desc = L.HealthBar_Background_Desc,
-		hasAlpha = true,
-		width = "normal",
-		order = 3
-	},
-	Fake = addVerticalSpacing(4),
-	HealthBar_HealthPrediction_Enabled = {
-		type = "toggle",
-		name = COMPACT_UNIT_FRAME_PROFILE_DISPLAYHEALPREDICTION,
-		width = "normal",
-		order = 5,
+	All = {
+		Texture = {
+			type = "select",
+			name = L.BarTexture,
+			desc = L.Texture_Desc,
+			dialogControl = 'LSM30_Statusbar',
+			values = AceGUIWidgetLSMlists.statusbar,
+			width = "normal",
+			order = 1
+		},
+		Fake = Data.optionHelpers.addHorizontalSpacing(2),
+		Background = {
+			type = "color",
+			name = L.BarBackground,
+			desc = L.Background_Desc,
+			hasAlpha = true,
+			width = "normal",
+			order = 3
+		},
+		Fake = Data.optionHelpers.addVerticalSpacing(4),
+		HealthPrediction_Enabled = {
+			type = "toggle",
+			name = COMPACT_UNIT_FRAME_PROFILE_DISPLAYHEALPREDICTION,
+			width = "normal",
+			order = 5,
+		}
 	}
 }
+
+
 	
 	
 
 
-local healthBar = BattleGroundEnemies:RegisterModule("healthBar", defaults, options)
-healthBar:SetScript("OnEvent", function(self, event, ...)
-	BattleGroundEnemies:Debug("BattleGroundEnemies OnEvent", event, ...)
-	self[event](self, ...) 
-end)
+local HealthBar = {} 
 
 
-healthBar.AttachToButton = function(self, playerButton)
-	playerButton.healthBar = CreateFrame('StatusBar', nil, playerButton)
-	playerButton.healthBar:SetPoint('BOTTOMLEFT', playerButton, "BOTTOMLEFT")
-	playerButton.healthBar:SetPoint('TOPRIGHT', playerButton, "TOPRIGHT")
-	playerButton.healthBar:SetMinMaxValues(0, 1)
+HealthBar.AttachToButton = function(self, playerButton)
+	local healthBar = CreateFrame('StatusBar', nil, playerButton)
+	healthBar:SetPoint('BOTTOMLEFT', playerButton, "BOTTOMLEFT")
+	healthBar:SetPoint('TOPRIGHT', playerButton, "TOPRIGHT")
+	healthBar:SetMinMaxValues(0, 1)
 	
-	playerButton.myHealPrediction = playerButton.healthBar:CreateTexture(nil, "BORDER", nil, 5)
+	playerButton.myHealPrediction = healthBar:CreateTexture(nil, "BORDER", nil, 5)
 	playerButton.myHealPrediction:ClearAllPoints();
 	playerButton.myHealPrediction:SetColorTexture(1,1,1);
 	playerButton.myHealPrediction:SetGradient("VERTICAL", 8/255, 93/255, 72/255, 11/255, 136/255, 105/255);
 	playerButton.myHealPrediction:SetVertexColor(0.0, 0.659, 0.608);
 	
 	
-	playerButton.myHealAbsorb = playerButton.healthBar:CreateTexture(nil, "ARTWORK", nil, 1)
+	playerButton.myHealAbsorb = healthBar:CreateTexture(nil, "ARTWORK", nil, 1)
 	playerButton.myHealAbsorb:ClearAllPoints();
 	playerButton.myHealAbsorb:SetTexture("Interface\\RaidFrame\\Absorb-Fill", true, true);
 	
-	playerButton.myHealAbsorbLeftShadow = playerButton.healthBar:CreateTexture(nil, "ARTWORK", nil, 1)
+	playerButton.myHealAbsorbLeftShadow = healthBar:CreateTexture(nil, "ARTWORK", nil, 1)
 	playerButton.myHealAbsorbLeftShadow:ClearAllPoints();
 	
-	playerButton.myHealAbsorbRightShadow = playerButton.healthBar:CreateTexture(nil, "ARTWORK", nil, 1)
+	playerButton.myHealAbsorbRightShadow = healthBar:CreateTexture(nil, "ARTWORK", nil, 1)
 	playerButton.myHealAbsorbRightShadow:ClearAllPoints();
 	
-	playerButton.otherHealPrediction = playerButton.healthBar:CreateTexture(nil, "BORDER", nil, 5)
+	playerButton.otherHealPrediction = healthBar:CreateTexture(nil, "BORDER", nil, 5)
 	playerButton.otherHealPrediction:SetColorTexture(1,1,1);
 	playerButton.otherHealPrediction:SetGradient("VERTICAL", 11/255, 53/255, 43/255, 21/255, 89/255, 72/255);
 	
 	
-	playerButton.totalAbsorbOverlay = playerButton.healthBar:CreateTexture(nil, "BORDER", nil, 6)
+	playerButton.totalAbsorbOverlay = healthBar:CreateTexture(nil, "BORDER", nil, 6)
 	playerButton.totalAbsorbOverlay:SetTexture("Interface\\RaidFrame\\Shield-Overlay", true, true);	--Tile both vertically and horizontally
 	playerButton.totalAbsorbOverlay.tileSize = 20;
 	
-	playerButton.totalAbsorb = playerButton.healthBar:CreateTexture(nil, "BORDER", nil, 5)
+	playerButton.totalAbsorb = healthBar:CreateTexture(nil, "BORDER", nil, 5)
 	playerButton.totalAbsorb:SetTexture("Interface\\RaidFrame\\Shield-Fill");
 	playerButton.totalAbsorb.overlay = playerButton.totalAbsorbOverlay
 	playerButton.totalAbsorbOverlay:SetAllPoints(playerButton.totalAbsorb);
 	
-	playerButton.overAbsorbGlow = playerButton.healthBar:CreateTexture(nil, "ARTWORK", nil, 2)
+	playerButton.overAbsorbGlow = healthBar:CreateTexture(nil, "ARTWORK", nil, 2)
 	playerButton.overAbsorbGlow:SetTexture("Interface\\RaidFrame\\Shield-Overshield");
 	playerButton.overAbsorbGlow:SetBlendMode("ADD");
-	playerButton.overAbsorbGlow:SetPoint("BOTTOMLEFT", playerButton.healthBar, "BOTTOMRIGHT", -7, 0);
-	playerButton.overAbsorbGlow:SetPoint("TOPLEFT", playerButton.healthBar, "TOPRIGHT", -7, 0);
+	playerButton.overAbsorbGlow:SetPoint("BOTTOMLEFT", healthBar, "BOTTOMRIGHT", -7, 0);
+	playerButton.overAbsorbGlow:SetPoint("TOPLEFT", healthBar, "TOPRIGHT", -7, 0);
 	playerButton.overAbsorbGlow:SetWidth(16);
 	playerButton.overAbsorbGlow:Hide()
 	
-	playerButton.overHealAbsorbGlow = playerButton.healthBar:CreateTexture(nil, "ARTWORK", nil, 2)
+	playerButton.overHealAbsorbGlow = healthBar:CreateTexture(nil, "ARTWORK", nil, 2)
 	playerButton.overHealAbsorbGlow:SetTexture("Interface\\RaidFrame\\Absorb-Overabsorb");
 	playerButton.overHealAbsorbGlow:SetBlendMode("ADD");
-	playerButton.overHealAbsorbGlow:SetPoint("BOTTOMRIGHT", playerButton.healthBar, "BOTTOMLEFT", 7, 0);
-	playerButton.overHealAbsorbGlow:SetPoint("TOPRIGHT", playerButton.healthBar, "TOPLEFT", 7, 0);
+	playerButton.overHealAbsorbGlow:SetPoint("BOTTOMRIGHT", healthBar, "BOTTOMLEFT", 7, 0);
+	playerButton.overHealAbsorbGlow:SetPoint("TOPRIGHT", healthBar, "TOPLEFT", 7, 0);
 	playerButton.overHealAbsorbGlow:SetWidth(16);
 	playerButton.overHealAbsorbGlow:Hide()
 	
 	
-	playerButton.healthBar.Background = playerButton.healthBar:CreateTexture(nil, 'BACKGROUND', nil, 2)
-	playerButton.healthBar.Background:SetAllPoints()
-	playerButton.healthBar.Background:SetTexture("Interface/Buttons/WHITE8X8")
-end
+	healthBar.Background = healthBar:CreateTexture(nil, 'BACKGROUND', nil, 2)
+	healthBar.Background:SetAllPoints()
+	healthBar.Background:SetTexture("Interface/Buttons/WHITE8X8")
 
-healthBar.Enable = function(self, playerButton)
-	local GeneralEvents = {"UNIT_HEALTH", "UNIT_MAXHEALTH"}
-	local TBCCEvents = {"UNIT_HEALTH_FREQUENT"}
-	local RetailEvents = {"UNIT_HEAL_PREDICTION", "UNIT_ABSORB_AMOUNT_CHANGED", "UNIT_HEAL_ABSORB_AMOUNT_CHANGED"}
-	if isTBCC then
-		Mixin(GeneralEvents, TBCCEvents)
-	elseif isRetail then
-		Mixin(GeneralEvents, RetailEvents)
+	healthBar.ApplySettings = function(self)
+		self:SetStatusBarTexture(LSM:Fetch("statusbar", self.config.Texture))--self.healthBar:SetStatusBarTexture(137012)
+		self.Background:SetVertexColor(unpack(self.config.Background))
+	end
+	
+	
+	
+	healthBar.NewPlayer = function(self)
+		local color = playerButton.PlayerClassColor
+		self:SetStatusBarColor(color.r,color.g,color.b)
+		self:SetMinMaxValues(0, 1)
+		self:SetValue(1)
+	end
+	
+	healthBar.Reset = function(self)
+		self:SetMinMaxValues(0, 1)
+		self:SetValue(1)
 	end
 
-	for i = 1, #GeneralEvents do
-		healthBar:RegisterEvent(GeneralEvents(i))
+	healthBar.PlayerIsDead = function(self)
+		if playerButton.isAlive then
+			self.MainFrame:RunModuleFunction(playerButton, "PlayerDied")
+			self:SetValue(0)
+		end
+		playerButton.isAlive = false
 	end
-	playerButton.healthBar:Show()
+
+	healthBar.PlayerIsAlive	= function(self)
+		if not playerButton.isAlive then
+			self.MainFrame:RunModuleFunction(playerButton, "PlayerRevived")
+		end
+		playerButton.isAlive = true
+	end
+
+
+	healthBar.UpdateForUnit = function(self, unitID)
+		self:SetMinMaxValues(0, UnitHealthMax(unitID))
+		self:SetValue(UnitHealth(unitID))
+		
+		if UnitIsDeadOrGhost(unitID) then
+			self:PlayerIsDead()
+		else
+			self:PlayerIsAlive()
+		end
+
+		playerButton.displayedUnit = unitID
+		playerButton.optionTable = {displayHealPrediction = self.config.HealthPrediction_Enabled}
+		if not isTBCC then CompactUnitFrame_UpdateHealPrediction(playerButton) end
+	end
+	
+	healthBar.Test = function(self)
+		self:SetMinMaxValues(0, 100)
+		local health = mathrandom(0, 100)
+		if playerButton.ObjectiveAndRespawn.ActiveRespawnTimer then return end --when the respawn timer is shown dont change anything
+
+		if health == 0 then --don't let players die that are holding a flag at the moment
+			--BattleGroundEnemies:Debug("dead")
+			self:PlayerIsDead()
+		else --player is alive
+			self:SetValue(health)
+			self:PlayerIsAlive()
+		end
+	end
+
+	playerButton.healthBar = healthBar
+	return playerButton.healthBar
 end
 
-healthBar.UNIT_HEALTH = function(self, unitID)
-	local playerButton = BattleGroundEnemies:GetPlayerbuttonByUnitID(unitID)
+
+local CombatLogevents = {}
+
+--CombatLogevents.SPELL_DISPEL = CombatLogevents.SPELL_AURA_REMOVED
+
+function CombatLogevents.UNIT_DIED(self, _, destName, _, _, _)
+	--self:Debug("subevent", destName, "UNIT_DIED")
+	local playerButton = self.MainFrame:GetPlayerbuttonByName(destName)
+	if playerButton then
+		playerButton.HealthBar:PlayerIsDead()
+	end
+end
+
+ObjectiveAndRespawn.COMBAT_LOG_EVENT_UNFILTERED = function(self)
+	local timestamp,subevent,hide,srcGUID,srcName,srcF1,srcF2,destGUID,destName,destF1,destF2,spellID,spellName,spellSchool, auraType = CombatLogGetCurrentEventInfo()
+	if CombatLogevents[subevent] then 
+		return CombatLogevents[subevent](self, srcName, destName, spellID, spellName, auraType) 
+	end
+end
+
+HealthBar.UNIT_HEALTH = function(self, unitID)
+	local playerButton = self.MainFrame:GetPlayerbuttonByUnitID(unitID)
 	if playerButton and playerButton.isShown then --unit is a shown player
-		self:Update(playerButton, unitID)
+		self:UpdateForUnit(playerButton, unitID)
 	end
 end
 
-healthBar.UNIT_HEALTH_FREQUENT = healthBar.UNIT_HEALTH --TBC compability, isTBCC
-healthBar.UNIT_MAXHEALTH = healthBar.UNIT_HEALTH --TBC compability, isTBCC
-healthBar.UNIT_HEAL_PREDICTION = healthBar.UNIT_HEALTH --TBC compability, isTBCC
-healthBar.UNIT_ABSORB_AMOUNT_CHANGED = healthBar.UNIT_HEALTH --TBC compability, isTBCC
-healthBar.UNIT_HEAL_ABSORB_AMOUNT_CHANGED = healthBar.UNIT_HEALTH --TBC compability, isTBCC
+HealthBar.UNIT_HEALTH_FREQUENT = HealthBar.UNIT_HEALTH --TBC compability, isTBCC
+HealthBar.UNIT_MAXHEALTH = HealthBar.UNIT_HEALTH --TBC compability, isTBCC
+HealthBar.UNIT_HEAL_PREDICTION = HealthBar.UNIT_HEALTH --TBC compability, isTBCC
+HealthBar.UNIT_ABSORB_AMOUNT_CHANGED = HealthBar.UNIT_HEALTH --TBC compability, isTBCC
+HealthBar.UNIT_HEAL_ABSORB_AMOUNT_CHANGED = HealthBar.UNIT_HEALTH --TBC compability, isTBCC
 
-healthBar.Disable = function(self, playerButton)
-	self:UnregisterAllEvents()
-	playerButton.healthBar:Hide()
-end
-
-
-healthBar.ApplySettings = function(self, playerButton, config)
-	playerButton.healthBar.config = config
-	playerButton.healthBar:SetStatusBarTexture(LSM:Fetch("statusbar", config.HealthBar_Texture))--self.healthBar:SetStatusBarTexture(137012)
-	playerButton.healthBar.Background:SetVertexColor(unpack(config.HealthBar_Background))
-end
-
-
-
-healthBar.NewPlayer = function(self, playerButton)
-	local color = playerButton.PlayerClassColor
-	playerButton.healthBar:SetStatusBarColor(color.r,color.g,color.b)
-	playerButton.healthBar:SetMinMaxValues(0, 1)
-	playerButton.healthBar:SetValue(1)
-end
-
-healthBar.Reset = function(self, playerButton)
-	playerButton.healthBar:SetMinMaxValues(0, 1)
-	playerButton.healthBar:SetValue(1)
-end
-
-healthBar.Update = function(self, playerButton, unitID)
-	playerButton.healthBar:SetMinMaxValues(0, UnitHealthMax(unitID))
-	playerButton.healthBar:SetValue(UnitHealth(unitID))
-	playerButton.displayedUnit = unitID
-	playerButton.optionTable = {displayHealPrediction = playerButton.bgSizeConfig.HealthBar_HealthPrediction_Enabled}
-	if not isTBCC then CompactUnitFrame_UpdateHealPrediction(playerButton) end
-end
-
-
-	
-
-
-
-
-
-
-
-
-
-
-
-	
+BattleGroundEnemies:RegisterModule("HealthBar", HealthBar, false, defaults, options, {General = {"UNIT_HEALTH", "UNIT_MAXHEALTH"}, TBCC = {"UNIT_HEALTH_FREQUENT"}, Retail = {"UNIT_HEAL_PREDICTION", "UNIT_ABSORB_AMOUNT_CHANGED", "UNIT_HEAL_ABSORB_AMOUNT_CHANGED"}})  -- module needs to be written with lowercase for the CompactUnitFrame_UpdateHealPrediction function

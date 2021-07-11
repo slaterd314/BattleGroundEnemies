@@ -33,6 +33,7 @@ Messaging.lua
 TargetCall.lua
 Changelog.lua
 
+Options.lua
 
 Modules\Auracontainer.lua
 Modules\DR.lua
@@ -43,4 +44,3 @@ Modules\Trinket.lua
 Modules\Power.lua
 
 Testmode.lua
-Options.lua
