@@ -1,11 +1,13 @@
-## Interface: 90100
-## Interface-Retail: 90100
-## Interface-BCC: 20501
+## Interface: 100002
+## Interface-Retail: 100002
+## Interface-Classic: 11403
+## Interface-BCC: 20504
+## Interface-Wrath: 30400
 ## Title: BattleGroundEnemies
 ## Version: @project-version@
 ## Author: Bullsei
 ## SavedVariables: BattleGroundEnemiesDB
-## OptionalDeps: Ace3, LibStub, LibRaces-1.0, UTF8, DRList-1.0, LibSharedMedia-3.0, AceGUI-3.0-SharedMediaWidgets, LibPlayerSpells-1.0
+## OptionalDeps: Ace3, LibStub, LibRaces-1.0, UTF8, DRList-1.0, LibSharedMedia-3.0, AceGUI-3.0-SharedMediaWidgets
 
 ## X-Curse-Project-ID: 274066
 ## X-Wago-ID: nQN5aoNB
@@ -14,17 +16,11 @@
 embeds.xml
 #@end-no-lib-strip@
 
-Locales\enUS.lua
-Locales\deDE.lua
-Locales\esES.lua
-Locales\esMX.lua
-Locales\frFR.lua
-Locales\itIT.lua
-Locales\koKR.lua
-Locales\ptBR.lua
-Locales\ruRU.lua
-Locales\zhCN.lua
-Locales\zhTW.lua
+#@retail@
+Libs\LibGroupInSpecT-1.1\lib.xml
+#@end-retail@
+
+Locales.lua
 
 Data.lua
 Defaults.lua
@@ -32,13 +28,27 @@ Main.lua
 Messaging.lua
 TargetCall.lua
 Changelog.lua
+ImportExport.lua
 
-
-Objects\Auracontainer.lua
+Objects\ContainerTemplate.lua
+Objects\Auras.lua
+Objects\CastBar.lua
+Objects\CombatIndicator.lua
+Objects\Covenant.lua
 Objects\DR.lua
+Objects\HealthBar.lua
+Objects\HighestActivePriority.lua
+Objects\Level.lua
+Objects\Name.lua
 Objects\ObjectiveAndRespawn.lua
+Objects\Power.lua
 Objects\Racial.lua
+Objects\RaidTargetIcon.lua
+Objects\Role.lua
+Objects\SpecAndClass.lua
+Objects\TargetIndicatorNumeric.lua
+Objects\TargetIndicatorSymbolic.lua
 Objects\Trinket.lua
 
-Testmode.lua
+
 Options.lua
